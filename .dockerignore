@@ -1,0 +1,37 @@
+# Exclude buildozer cache and build directories
+.buildozer/
+bin/
+build/
+
+# Exclude other unnecessary files
+*.pyc
+__pycache__/
+*.pyo
+*.pyd
+.Python
+*.so
+.coverage
+.pytest_cache/
+.git/
+.gitignore
+README.md
+*.md
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Docker files (don't need to copy these into container)
+Dockerfile*
+docker-compose*.yml

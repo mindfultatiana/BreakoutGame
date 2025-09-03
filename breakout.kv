@@ -1,0 +1,74 @@
+#:kivy 1.0
+
+<Player>:
+    size_hint: 0.1, 0.05
+    pos_hint: {'x': root.position, 'y': 0.05}
+    canvas:
+        Color:
+            rgba: 1, 1, 1, 1
+        Rectangle:
+            pos: self.pos
+            size: self.size
+
+<Ball>:
+    size_hint: 0.03, 0.03
+    pos_hint: {'x': root.pos_hint_x, 'y': root.pos_hint_y}
+    canvas:
+        Color:
+            rgba: 1, 1, 1, 1
+        Ellipse:
+            pos: self.pos
+            size: self.size
+
+<Block>:
+    size_hint: 0.08, 0.06
+    canvas:
+        Color:
+            rgba: root.colour
+        Rectangle:
+            pos: self.pos
+            size: self.size
+
+<Game>:
+    player: player_widget
+    ball: ball_widget
+    
+    canvas:
+        Color:
+            rgba: 0, 0, 0, 1
+        Rectangle:
+            pos: self.pos
+            size: self.size
+    
+    Player:
+        id: player_widget
+    
+    Ball:
+        id: ball_widget
+
+<GameEndPopup>:
+    size_hint: 0.8, 0.4
+    auto_dismiss: False
+    
+    BoxLayout:
+        orientation: 'vertical'
+        padding: 20
+        spacing: 20
+        
+        Label:
+            text: root.message
+            markup: True
+            font_size: 24
+        
+        BoxLayout:
+            orientation: 'horizontal'
+            spacing: 20
+            size_hint_y: 0.3
+            
+            Button:
+                text: 'Play Again'
+                on_press: root.game.reset(); root.game.start(); root.dismiss()
+            
+            Button:
+                text: 'Quit'
+                on_press: app.stop()
