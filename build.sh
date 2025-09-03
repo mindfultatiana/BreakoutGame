@@ -11,11 +11,7 @@ if [ ! -f buildozer.spec ]; then
     buildozer init
 fi
 
-# Clean any previous builds
-echo "Cleaning previous builds..."
-buildozer android clean
-
-# Build with verbose output
+# Don't clean on first run - let buildozer set up the environment first
 echo "Building APK..."
 buildozer -v android debug
 
