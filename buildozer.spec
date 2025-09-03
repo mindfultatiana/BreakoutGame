@@ -82,12 +82,6 @@ android.permissions = INTERNET
 # (str) Android NDK version to use
 #android.ndk = 25b
 
-# (str) Supported orientation (landscape, sensorLandscape, portrait or all)
-orientation = portrait
-
-# (bool) Indicate if the application should be fullscreen or not
-fullscreen = 1
-
 [buildozer]
 
 # (int) Log level (0 = error only, 1 = info, 2 = debug (with command output))
