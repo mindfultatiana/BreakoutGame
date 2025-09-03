@@ -4,12 +4,12 @@ FROM python:3.9-bullseye
 ENV DEBIAN_FRONTEND=noninteractive
 ENV PYTHONUNBUFFERED=1
 
-# Install system dependencies
+# Install system dependencies with Java 17
 RUN apt-get update && apt-get install -y \
     git \
     zip \
     unzip \
-    openjdk-11-jdk \
+    openjdk-17-jdk \
     autoconf \
     libtool \
     pkg-config \
@@ -23,8 +23,8 @@ RUN apt-get update && apt-get install -y \
     build-essential \
     && rm -rf /var/lib/apt/lists/*
 
-# Set JAVA_HOME
-ENV JAVA_HOME=/usr/lib/jvm/java-11-openjdk-amd64
+# Set JAVA_HOME for Java 17
+ENV JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64
 ENV PATH=$PATH:$JAVA_HOME/bin
 
 # Upgrade pip and install Python packages
