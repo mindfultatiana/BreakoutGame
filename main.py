@@ -47,13 +47,20 @@ class Player(Widget):
         self.direction = 'none'
     
     def update(self, dt):
-        # Only use keyboard/continuous movement if no touch is active
+    # Only use keyboard/continuous movement if no touch is active
         if self.direction != 'none':
             dir_dict = {'right': 1, 'left': -1, 'none': 0}
             # Increased speed from 0.5 to 1.5 for faster movement
             self.position += (1.5 * dt * dir_dict[self.direction])
-            # Keep player within same generous bounds
-            self.position = max(-0.02, min(0.92, self.position))
+        
+            # Calculate proper bounds accounting for paddle width
+            # Player size_hint is (0.1, 0.05), so width takes up 10% of screen
+            paddle_width = 0.1  # This matches the size_hint x value
+            min_pos = 0.0  # Left edge of screen
+            max_pos = 1.0 - paddle_width  # Right edge minus paddle width
+        
+            # Keep player within proper bounds
+            self.position = max(min_pos, min(max_pos, self.position))
 
 class Ball(Widget):
     pos_hint_x = NumericProperty(0.5)
