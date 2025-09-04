@@ -48,8 +48,8 @@ class Player(Widget):
     
     def update(self, dt):
         dir_dict = {'right': 1, 'left': -1, 'none': 0}
-        # Increased speed from 0.5 to 2.5 for faster movement
-        self.position += (2.5 * dt * dir_dict[self.direction])
+        # Increased speed from 0.5 to 1.5 for faster movement
+        self.position += (1.5 * dt * dir_dict[self.direction])
         # Keep player within bounds
         self.position = max(0, min(1 - 0.1, self.position))
 
@@ -145,6 +145,18 @@ class Game(FloatLayout):
         
         self.add_widget(self.player)
         self.add_widget(self.ball)
+    
+    def on_touch_down(self, touch):
+        # Pass touch events to the player
+        return self.player.on_touch_down(touch)
+    
+    def on_touch_move(self, touch):
+        # Pass touch move events to the player
+        return self.player.on_touch_move(touch)
+    
+    def on_touch_up(self, touch):
+        # Pass touch up events to the player
+        return self.player.on_touch_up(touch)
     
     def update_bg(self, *args):
         self.bg_rect.pos = self.pos
