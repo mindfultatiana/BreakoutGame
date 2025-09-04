@@ -149,15 +149,19 @@ class Game(FloatLayout):
         self.add_widget(self.ball)
     
     def on_touch_down(self, touch):
-        # Pass touch events to the player
-        return self.player.on_touch_down(touch)
+        # Only handle touches in the bottom half of screen (where paddle area is)
+        if touch.y < self.height * 0.5:
+            return self.player.on_touch_down(touch)
+        return False
     
     def on_touch_move(self, touch):
-        # Pass touch move events to the player
-        return self.player.on_touch_move(touch)
+        # Only handle touches in the bottom half of screen
+        if touch.y < self.height * 0.5:
+            return self.player.on_touch_move(touch)
+        return False
     
     def on_touch_up(self, touch):
-        # Pass touch up events to the player
+        # Always handle touch up to reset touch state
         return self.player.on_touch_up(touch)
     
     def update_bg(self, *args):
