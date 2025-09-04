@@ -47,11 +47,13 @@ class Player(Widget):
         self.direction = 'none'
     
     def update(self, dt):
-        dir_dict = {'right': 1, 'left': -1, 'none': 0}
-        # Increased speed from 0.5 to 1.5 for faster movement
-        self.position += (1.5 * dt * dir_dict[self.direction])
-        # Keep player within bounds
-        self.position = max(0, min(1 - 0.1, self.position))
+        # Only use keyboard/continuous movement if no touch is active
+        if self.direction != 'none':
+            dir_dict = {'right': 1, 'left': -1, 'none': 0}
+            # Increased speed from 0.5 to 1.5 for faster movement
+            self.position += (1.5 * dt * dir_dict[self.direction])
+            # Keep player within bounds
+            self.position = max(0, min(0.9, self.position))
 
 class Ball(Widget):
     pos_hint_x = NumericProperty(0.5)
