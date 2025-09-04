@@ -52,8 +52,8 @@ class Player(Widget):
             dir_dict = {'right': 1, 'left': -1, 'none': 0}
             # Increased speed from 0.5 to 1.5 for faster movement
             self.position += (1.5 * dt * dir_dict[self.direction])
-            # Keep player within bounds
-            self.position = max(0, min(0.9, self.position))
+            # Keep player within same generous bounds
+            self.position = max(-0.02, min(0.92, self.position))
 
 class Ball(Widget):
     pos_hint_x = NumericProperty(0.5)
@@ -247,9 +247,7 @@ class Game(FloatLayout):
 class BreakoutApp(App):
     def build(self):
         g = Game()
-        if kivy_platform != 'android':
-            Window.bind(on_key_down=g.player.on_key_down)
-            Window.bind(on_key_up=g.player.on_key_up)
+        # No keyboard bindings needed for touchscreen
         g.reset()
         Clock.schedule_once(g.start, 0)
         return g
