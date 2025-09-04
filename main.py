@@ -14,7 +14,6 @@ __version__ = '0.1'  # Used later during Android compilation
 
 class Player(Widget):
     position = NumericProperty(0.5)
-    direction = StringProperty('none')
     
     def __init__(self, **kwargs):
         super(Player, self).__init__(**kwargs)
@@ -22,45 +21,56 @@ class Player(Widget):
             Color(1, 1, 1, 1)  # White color
             self.rect = Rectangle(pos=self.pos, size=self.size)
         self.bind(pos=self.update_graphics, size=self.update_graphics)
+        self.touch_active = False
+        self.target_position = 0.5
     
     def update_graphics(self, *args):
         self.rect.pos = self.pos
         self.rect.size = self.size
     
     def on_touch_down(self, touch):
-        if self.parent:
-            self.direction = (
-                'right' if touch.x > self.parent.center_x else 'left')
+        if self.parent and touch.y < self.parent.height * 0.5:
+            self.touch_active = True
+            # Convert touch x to relative position (0.0 to 1.0)
+            relative_x = touch.x / self.parent.width
+            # Center the paddle on the touch point
+            paddle_width = 0.1  # size_hint x value
+            self.target_position = relative_x - (paddle_width / 2)
+            return True
+        return False
+    
+    def on_touch_move(self, touch):
+        if self.touch_active and self.parent:
+            # Convert touch x to relative position (0.0 to 1.0)
+            relative_x = touch.x / self.parent.width
+            # Center the paddle on the touch point
+            paddle_width = 0.1  # size_hint x value
+            self.target_position = relative_x - (paddle_width / 2)
+            return True
+        return False
     
     def on_touch_up(self, touch):
-        self.direction = 'none'
-    
-    def on_key_down(self, keypress, scancode, *args):
-        if scancode == 275:  # Right arrow
-            self.direction = 'right'
-        elif scancode == 276:  # Left arrow
-            self.direction = 'left'
-        else:
-            self.direction = 'none'
-    
-    def on_key_up(self, *args):
-        self.direction = 'none'
+        self.touch_active = False
+        return True
     
     def update(self, dt):
-    # Only use keyboard/continuous movement if no touch is active
-        if self.direction != 'none':
-            dir_dict = {'right': 1, 'left': -1, 'none': 0}
-            # Increased speed from 0.5 to 1.5 for faster movement
-            self.position += (1.5 * dt * dir_dict[self.direction])
+        if self.touch_active:
+            # Move towards target position smoothly
+            diff = self.target_position - self.position
+            # Adjust speed - higher value = faster response
+            move_speed = 8.0
+            self.position += diff * move_speed * dt
         
-            # Calculate proper bounds accounting for paddle width
-            # Player size_hint is (0.1, 0.05), so width takes up 10% of screen
-            paddle_width = 0.1  # This matches the size_hint x value
-            min_pos = 0.0  # Left edge of screen
-            max_pos = 1.0 - paddle_width  # Right edge minus paddle width
+        # Calculate proper bounds accounting for paddle width
+        paddle_width = 0.1  # This matches the size_hint x value
+        min_pos = 0.0  # Left edge of screen
+        max_pos = 1.0 - paddle_width  # Right edge minus paddle width
         
-            # Keep player within proper bounds
-            self.position = max(min_pos, min(max_pos, self.position))
+        # Keep player within proper bounds
+        self.position = max(min_pos, min(max_pos, self.position))
+        
+        # Also clamp target position to prevent issues
+        self.target_position = max(min_pos, min(max_pos, self.target_position))
 
 class Ball(Widget):
     pos_hint_x = NumericProperty(0.5)
@@ -156,19 +166,17 @@ class Game(FloatLayout):
         self.add_widget(self.ball)
     
     def on_touch_down(self, touch):
-        # Only handle touches in the bottom half of screen (where paddle area is)
+        # Let the player handle all touches in the bottom half
         if touch.y < self.height * 0.5:
             return self.player.on_touch_down(touch)
         return False
     
     def on_touch_move(self, touch):
-        # Only handle touches in the bottom half of screen
-        if touch.y < self.height * 0.5:
-            return self.player.on_touch_move(touch)
-        return False
+        # Let the player handle touch movement
+        return self.player.on_touch_move(touch)
     
     def on_touch_up(self, touch):
-        # Always handle touch up to reset touch state
+        # Let the player handle touch release
         return self.player.on_touch_up(touch)
     
     def update_bg(self, *args):
@@ -254,7 +262,6 @@ class Game(FloatLayout):
 class BreakoutApp(App):
     def build(self):
         g = Game()
-        # No keyboard bindings needed for touchscreen
         g.reset()
         Clock.schedule_once(g.start, 0)
         return g
