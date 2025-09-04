@@ -7,6 +7,7 @@ from kivy.properties import (ListProperty, NumericProperty,
 from kivy.clock import Clock
 from kivy.core.window import Window
 from kivy.utils import platform as kivy_platform
+from kivy.graphics import Color, Rectangle, Ellipse
 import random
 
 __version__ = '0.1'  # Used later during Android compilation
@@ -15,9 +16,21 @@ class Player(Widget):
     position = NumericProperty(0.5)
     direction = StringProperty('none')
     
+    def __init__(self, **kwargs):
+        super(Player, self).__init__(**kwargs)
+        with self.canvas:
+            Color(1, 1, 1, 1)  # White color
+            self.rect = Rectangle(pos=self.pos, size=self.size)
+        self.bind(pos=self.update_graphics, size=self.update_graphics)
+    
+    def update_graphics(self, *args):
+        self.rect.pos = self.pos
+        self.rect.size = self.size
+    
     def on_touch_down(self, touch):
-        self.direction = (
-            'right' if touch.x > self.parent.center_x else 'left')
+        if self.parent:
+            self.direction = (
+                'right' if touch.x > self.parent.center_x else 'left')
     
     def on_touch_up(self, touch):
         self.direction = 'none'
@@ -42,8 +55,18 @@ class Player(Widget):
 class Ball(Widget):
     pos_hint_x = NumericProperty(0.5)
     pos_hint_y = NumericProperty(0.3)
-    proper_size = NumericProperty(0.)
     velocity = ListProperty([0.1, 0.5])
+    
+    def __init__(self, **kwargs):
+        super(Ball, self).__init__(**kwargs)
+        with self.canvas:
+            Color(1, 1, 1, 1)  # White color
+            self.ellipse = Ellipse(pos=self.pos, size=self.size)
+        self.bind(pos=self.update_graphics, size=self.update_graphics)
+    
+    def update_graphics(self, *args):
+        self.ellipse.pos = self.pos
+        self.ellipse.size = self.size
     
     def update(self, dt):
         self.pos_hint_x += self.velocity[0] * dt
@@ -73,15 +96,29 @@ class Ball(Widget):
                 0.1 * ((self.center_x - player.center_x) / player.width))
 
 class Block(Widget):
-    colour = ListProperty([1, 0, 0])
+    colour = ListProperty([1, 0, 0, 1])
     
     def __init__(self, **kwargs):
         super(Block, self).__init__(**kwargs)
-        self.colour = random.choice([
-            (0.78, 0.28, 0),      # Orange
-            (0.28, 0.63, 0.28),   # Green
-            (0.25, 0.28, 0.78)    # Blue
-        ])
+        # More vibrant colors that should show up better
+        colors = [
+            [1.0, 0.5, 0.0, 1.0],    # Orange
+            [0.0, 0.8, 0.0, 1.0],    # Green
+            [0.0, 0.5, 1.0, 1.0],    # Blue
+            [1.0, 0.0, 0.5, 1.0],    # Pink
+            [0.8, 0.0, 0.8, 1.0],    # Purple
+            [1.0, 1.0, 0.0, 1.0],    # Yellow
+        ]
+        self.colour = random.choice(colors)
+        
+        with self.canvas:
+            Color(*self.colour)
+            self.rect = Rectangle(pos=self.pos, size=self.size)
+        self.bind(pos=self.update_graphics, size=self.update_graphics)
+    
+    def update_graphics(self, *args):
+        self.rect.pos = self.pos
+        self.rect.size = self.size
 
 class GameEndPopup(ModalView):
     message = StringProperty()
@@ -92,18 +129,50 @@ class Game(FloatLayout):
     player = ObjectProperty()
     ball = ObjectProperty()
     
+    def __init__(self, **kwargs):
+        super(Game, self).__init__(**kwargs)
+        
+        # Set black background
+        with self.canvas.before:
+            Color(0, 0, 0, 1)  # Black background
+            self.bg_rect = Rectangle(pos=self.pos, size=self.size)
+        self.bind(pos=self.update_bg, size=self.update_bg)
+        
+        # Create player and ball
+        self.player = Player(size_hint=(0.1, 0.05), pos_hint={'x': 0.45, 'y': 0.05})
+        self.ball = Ball(size_hint=(0.03, 0.03), pos_hint={'x': 0.485, 'y': 0.3})
+        
+        self.add_widget(self.player)
+        self.add_widget(self.ball)
+    
+    def update_bg(self, *args):
+        self.bg_rect.pos = self.pos
+        self.bg_rect.size = self.size
+    
     def setup_blocks(self):
+        for block in self.blocks:
+            self.remove_widget(block)
+        self.blocks = []
+        
         for y_jump in range(5):
             for x_jump in range(10):
-                block = Block(pos_hint={
-                    'x': 0.05 + 0.09*x_jump,
-                    'y': 0.6 + 0.08*y_jump})  # Position blocks at top
+                block = Block(
+                    size_hint=(0.08, 0.06),
+                    pos_hint={
+                        'x': 0.05 + 0.09*x_jump,
+                        'y': 0.6 + 0.08*y_jump
+                    }
+                )
                 self.blocks.append(block)
                 self.add_widget(block)
     
     def update(self, dt):
         self.ball.update(dt)
         self.player.update(dt)
+        
+        # Update positions based on pos_hint
+        self.player.pos_hint = {'x': self.player.position, 'y': 0.05}
+        self.ball.pos_hint = {'x': self.ball.pos_hint_x, 'y': self.ball.pos_hint_y}
     
     def start(self, *args):
         Clock.schedule_interval(self.update, 1./60.)
