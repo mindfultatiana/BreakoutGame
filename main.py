@@ -48,7 +48,8 @@ class Player(Widget):
     
     def update(self, dt):
         dir_dict = {'right': 1, 'left': -1, 'none': 0}
-        self.position += (0.5 * dt * dir_dict[self.direction])
+        # Increased speed from 0.5 to 2.5 for faster movement
+        self.position += (2.5 * dt * dir_dict[self.direction])
         # Keep player within bounds
         self.position = max(0, min(1 - 0.1, self.position))
 
